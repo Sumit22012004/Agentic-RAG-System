@@ -30,7 +30,7 @@ I designed the system using a **Microservices-inspired Client-Server Architectur
 |                                                                                   |
 |      +--------------+          +--------------+          +--------------+         |
 |      |  MCP Server  | <------> | Milvus (DB)  | <------- |  Documents   |         |
-|      |   Process    |          | Hybrid Search|          | (PDF, Excel) |         |
+|      |   Process    |          | Vector Search|          |(PDF,DOCX,PPT)|         |
 |      +--------------+          +--------------+          +--------------+         |
 +-----------------------------------------------------------------------------------+
 ```
@@ -40,7 +40,7 @@ I designed the system using a **Microservices-inspired Client-Server Architectur
 2.  **LangGraph Agent**: The central brain. It maintains state, critiques its own retrieval results, and decides when to search.
 3.  **Redis**: used for **Checkpointing**. It stores the serialized state of the conversation graph, enabling long-running threading and persistence.
 4.  **MCP Server**: A standalone process I implemented to expose RAG capabilities.
-5.  **Milvus**: I selected Milvus for its **Hybrid Search** capability, which is crucial for handling mixed queries (semantic + keyword).
+5.  **Milvus**: I selected Milvus for its high-performance **Vector Search** capability, which is crucial for handling semantic queries.
 6.  **Ollama**: Handles local inference, ensuring all data stays on the machine.
 
 ---
@@ -90,11 +90,10 @@ I implemented a **Cyclic Graph** pattern for the agent. Unlike a standard RAG ch
 
 To achieve the "Maximum Performance" requirement, I focused on how data is retrieved and fed to the LLM.
 
-### A. Hybrid Search Strategy
-Vector search alone is often insufficient for corporate documents that contain specific error codes, IDs, or acronyms. I implemented a Hybrid Search approach in Milvus:
+### A. Retrieval Strategy
+I implemented a **Dense Vector Search** approach in Milvus:
 1.  **Dense Retrieval**: Catches semantic meaning (e.g., "The network is down" matches "Connection timeout").
-2.  **Sparse Retrieval (BM25)**: Catches exact keywords (e.g., "Error 504").
-3.  **Fusion**: Milvus automatically re-ranks these results to provide the most relevant chunks.
+2.  **Semantic Matching**: Ensures the agent can find conceptually relevant info even when phrasing differs.
 
 ### B. Smart Chunking
 I used a **Recursive Character Splitter** (1000 characters with 200 overlap). This ensures that sentences are not cut in the middle, preserving the semantic context for the embedding model.
@@ -106,7 +105,7 @@ I used a **Recursive Character Splitter** (1000 characters with 200 overlap). Th
 | Component | Choice | Rationale |
 | :--- | :--- | :--- |
 | **LLM** | **Ollama** | The assignment offered clear bonus points for self-hosted LLMs. It also prevents data leakage to cloud APIs. |
-| **Vector DB** | **Milvus** | Chosen for its scalability and native support for Hybrid Search, which distinguishes it from simpler stores like Chroma. |
+| **Vector DB** | **Milvus** | Chosen for its scalability and native support for high-scale vector search, which distinguishes it from simpler stores like Chroma. |
 | **Orchestrator** | **LangGraph** | I needed a graph-based framework to implement loops (cycles). Linear chains (LangChain) cannot easily handle "Retry" logic. |
 | **Interface** | **Streamlit** | Allowed me to build a clean UI rapidly, keeping the focus on the backend complexity. |
 | **Protocol** | **MCP** | This was a strategic choice to decouple the architecture. It proves I can build systems that interoperate with the broader AI ecosystem. |

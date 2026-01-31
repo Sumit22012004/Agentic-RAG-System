@@ -7,13 +7,13 @@ This is a production-grade, local-first **Agentic RAG System** designed for high
 I designed this system to solving the "dumb retrieval" problem common in basic RAG applications. Instead of a linear fetch-and-generate pipeline, I implemented a cyclic agent that reasons about its data:
 
 1.  **Self-Correction**: The agent evaluates retrieved documents. If they are irrelevant, it automatically rewrites the query and tries again.
-2.  **Hybrid Search**: By using Milvus, the system combines semantic search (Vectors) with exact keyword matching (BM25), ensuring it doesn't miss specific identifiers (e.g., "Error 503").
+2.  **Semantic Search**: By using Milvus and Sentence Transformers, the system performs high-accuracy dense vector retrieval to find conceptually relevant information, even if keywords don't match exactly.
 3.  **Decoupled Architecture**: I separated the "Brain" (Agent) from the "Knowledge" (Database) using an MCP Server. This makes the retrieval engine reusable by other agents or tools in the future.
 
 ## Tech Stack
 
-*   **LLM**: Ollama (Llama 3 / Mistral) - Chosen for local data privacy and zero cost.
-*   **Vector DB**: Milvus - Selected for its production-readiness and Hybrid Search capabilities.
+*   **LLM**: Ollama (Llama 3) - Chosen for local data privacy and zero cost.
+*   **Vector DB**: Milvus - Selected for its production-readiness and high-performance vector search.
 *   **Orchestration**: LangGraph - Used for managing complex, stateful conversation loops.
 *   **Storage**: Redis - Implements persistent conversation memory (checkpointing).
 *   **Protocol**: Model Context Protocol (MCP) - Standardizes the connection between the agent and data source.
@@ -35,7 +35,7 @@ cd Agentic-RAG-System
 ### 2. Infrastructure (Docker)
 Start the Milvus and Redis services:
 ```bash
-docker-compose up -d milvus redis
+docker-compose up -d
 ```
 
 ### 3. Install Dependencies
