@@ -18,7 +18,7 @@ I designed the system using a **Microservices-inspired Client-Server Architectur
 |                 +-------------------+  +--------------------+                     |
 |                 v                                           v                     |
 |      +-------------------+                         +-----------------+            |
-|      |    Ollama LLM     |                         |   LangSmith     |            |
+|      |    Ollama LLM     |                         |    Logging      |            |
 |      |  (Inference API)  |                         | (Observability) |            |
 |      +-------------------+                         +-----------------+            |
 +-----------------------------------------------------------------------------------+
@@ -118,7 +118,7 @@ I used a **Recursive Character Splitter** (1000 characters with 200 overlap). Th
 
 1.  **Async I/O**: I implemented the entire pipeline using Python's `asyncio`. This ensures that while the system is waiting for Milvus or the LLM, the server remains responsive to other requests.
 2.  **Dockerized Infrastructure**: To ensure the factor that it works on my machine, I containerized the complex dependencies (Milvus, Redis).
-3.  **Observability**: I integrated structured logging (and LangSmith where possible) to make the agent's thought process visible. This turns the "Black Box" into a "Glass Box".
+3.  **Observability**: I integrated structured logging to make the agent's thought process visible. This turns the "Black Box" into a "Glass Box".
 
 ## 6. Limitations
 

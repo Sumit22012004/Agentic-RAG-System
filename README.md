@@ -47,7 +47,6 @@ pip install -r requirements.txt
 Download the required models to your local machine:
 ```bash
 ollama pull llama3
-ollama pull nomic-embed-text
 ```
 
 ### 5. Run the System
