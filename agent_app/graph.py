@@ -6,6 +6,7 @@ import logging
 from langgraph.graph import StateGraph, END
 
 from .state import AgentState
+from .memory import ConversationMemory, save_history_background
 from .nodes import (
     retrieve,
     grade_documents,
@@ -79,12 +80,15 @@ def get_graph():
     return rag_graph
 
 
-async def run_agent(question: str, thread_id: str = "default") -> str:
+async def run_agent(question: str, session_id: str) -> str:
     """
     Run the RAG agent on a question.
     Returns the generated answer.
     """
     graph = get_graph()
+    # Get chat history from Redis (sync call)
+    memory = ConversationMemory(session_id)
+    history = memory.get_history_sync()
     
     initial_state = {
         "question": question,
@@ -92,15 +96,20 @@ async def run_agent(question: str, thread_id: str = "default") -> str:
         "answer": "",
         "retrieval_count": 0,
         "generation_count": 0,
+        "chat_history": history,
     }
     
-    logger.info(f"[Agent] Processing: '{question[:50]}...'")
+    logger.info(f"[Agent] Processing: '{question[:50]}...' with history len: {len(history)}")
     
     # Run the graph
-    config = {"configurable": {"thread_id": thread_id}}
+    config = {"configurable": {"thread_id": session_id}}
     result = await graph.ainvoke(initial_state, config)
     
     answer = result.get("answer", "I couldn't find an answer to your question.")
+    
+    # Save new turn to history in background
+    save_history_background(session_id, question, answer)
+    
     logger.info(f"[Agent] Completed, answer length: {len(answer)}")
     
     return answer

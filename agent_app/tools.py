@@ -6,6 +6,8 @@ import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from .config import OLLAMA_BASE_URL, LLM_MODEL
+from mcp_server.db import db
+from mcp_server.ingestion import generate_embeddings
 
 logger = logging.getLogger(__name__)
 
@@ -39,10 +41,6 @@ async def search_knowledge_base(query: str, top_k: int = 5) -> str:
     In production, this would be an HTTP call to the MCP server.
     """
     try:
-        # Direct import for simplicity (same process)
-        from mcp_server.db import db
-        from mcp_server.ingestion import generate_embeddings
-        
         # Generate embedding for query
         embeddings = await generate_embeddings([query])
         if not embeddings:

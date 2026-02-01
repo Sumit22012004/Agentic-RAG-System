@@ -16,14 +16,40 @@ async def retrieve(state: AgentState) -> dict:
     """Retrieve documents from the knowledge base."""
     question = state["question"]
     count = state.get("retrieval_count", 0)
+    history = state.get("chat_history", [])
     
-    logger.info(f"[Retrieve] Attempt {count + 1}, query: '{question[:50]}...'")
+    # Contextualize query if we have history
+    final_query = question
+    if history and count == 0:
+        logger.info("[Retrieve] Contextualizing query with history...")
+        
+        # Format history string
+        history_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in history[-6:]])
+        
+        prompt = f"""Given a chat history and the latest user question which might reference context in the chat history, 
+formulate a standalone question which can be understood without the chat history. 
+Do NOT answer the question, just reformulate it if needed and otherwise return it as is.
+
+Chat History:
+{history_str}
+
+Latest Question: {question}
+
+Standalone Question:"""
+        
+        search_query = await call_llm(prompt)
+        final_query = search_query.strip()
+        logger.info(f"[Retrieve] Contextualized query: '{final_query}'")
     
-    docs = await search_knowledge_base(question)
+    logger.info(f"[Retrieve] Attempt {count + 1}, query: '{final_query[:50]}...'")
+    
+    docs = await search_knowledge_base(final_query)
     
     return {
         "documents": [docs] if docs else [],
         "retrieval_count": count + 1,
+        # Update question in state to the comprehensive one for future steps
+        "question": final_query 
     }
 
 

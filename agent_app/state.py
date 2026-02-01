@@ -22,3 +22,6 @@ class AgentState(TypedDict):
     
     # Number of generation attempts
     generation_count: int
+    
+    # Chat history for context
+    chat_history: List[dict]
