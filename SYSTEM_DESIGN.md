@@ -98,6 +98,9 @@ I implemented a **Dense Vector Search** approach in Milvus:
 ### B. Smart Chunking
 I used a **Recursive Character Splitter** (1000 characters with 200 overlap). This ensures that sentences are not cut in the middle, preserving the semantic context for the embedding model.
 
+### C. Prompt Orchestration
+I use a structured prompt template that explicitly separates the **system instruction**, the **retrieved context**, and the **user's query**. This ensures the LLM understands that it must prioritize the retrieved data over its internal weights, preventing it from ignoring the "Knowledge Base".
+
 ---
 
 ## 4. Technology Choices & Rationale
@@ -116,7 +119,7 @@ I used a **Recursive Character Splitter** (1000 characters with 200 overlap). Th
 ## 5. Key Design Decisions
 
 1.  **Async I/O**: I implemented the entire pipeline using Python's `asyncio`. This ensures that while the system is waiting for Milvus or the LLM, the server remains responsive to other requests.
-2.  **Dockerized Infrastructure**: To ensure the factor that it works on my machine, I containerized the complex dependencies (Milvus, Redis).
+2.  **Dockerized Infrastructure**: To ensure the system is portable and easy to set up, I containerized the complex dependencies (Milvus, Redis).
 3.  **Observability**: I integrated structured logging to make the agent's thought process visible. This turns the "Black Box" into a "Glass Box".
 
 ## 6. Limitations
