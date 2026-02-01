@@ -126,3 +126,22 @@ I use a structured prompt template that explicitly separates the **system instru
 
 1.  **Hardware Requirements**: Running local LLMs is resource-intensive. The system performance is directly tied to the available GPU VRAM.
 2.  **Context Window**: While RAG helps, the local model (Llama 3) has a fixed context window. Extremely long summaries of 100+ documents would require a Map-Reduce approach which I did not implement in this version.
+3.  **Response Latency**: Since I am running the LLM locally on consumer hardware, I've observed that response times can be slower compared to cloud-hosted APIs. This leads to a visible delay before the user sees the answer.
+
+## 7. Future Improvements & Mitigation Strategies
+
+To address the **Response Latency** limitation, I can implement the following improvements:
+
+1.  **Cloud LLM Hosting**: I could migrate the inference layer to a hosted provider (e.g., Groq, AWS Bedrock, or OpenAI) to leverage enterprise-grade GPUs.
+2.  **Streaming Responses**: I can implement Token Streaming. Instead of waiting for the full response to generate, I would stream tokens to the UI as they are produced.
+    *   **Benefit**: This would reduce the **Time to First Token (TTFT)** to under **1 second**, making the application feel instant even if the full answer takes longer to complete.
+
+To address the **Hardware Requirements** limitation:
+
+1.  **Quantization**: I can use 4-bit or 8-bit quantized models to reduce VRAM usage significantly without major loss in quality.
+2.  **Model Distillation**: I could experiment with smaller, distilled models (like Llama 3 8B or Phi-3) that are optimized for consumer hardware.
+
+To address the **Context Window** limitation:
+
+1.  **Map-Reduce Summarization**: For extremely large document sets, I can implement a Map-Reduce agent that summarizes chunks in parallel before feeding them to the final answer generation step.
+2.  **Sliding Window Context**: I can implement a sliding window approach to process long documents in segments, ensuring the most relevant parts are always within the context limit.

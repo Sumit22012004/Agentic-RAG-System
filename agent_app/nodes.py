@@ -115,21 +115,21 @@ async def generate(state: AgentState) -> dict:
     
     context = "\n".join(documents) if documents else "No context available."
     
-    system_prompt = """You are a polite and direct assistant. Answer questions using ONLY the provided context.
+    system_prompt = """You are a helpful and knowledgeable AI assistant. Your goal is to provide clear, comprehensive, and well-structured answers based strictly on the provided context.
 
 Rules:
-1. Be direct: Give only the specific information requested. No additional commentary or explanations.
-2. No extras: Do not add related details unless explicitly asked.
-3. Missing info: If the context does not contain the answer, say exactly: "I don't have that information. You haven't shared those details with me yet. Please upload a document containing this information."
-4. Format: Match your response format to what was asked. If asked for a number, give the number. If asked for a name, give the name.
-5. Tone: Be polite but concise."""
+1. Be Helpful: Explain concepts clearly and provide a complete answer that fully addresses the user's question.
+2. Structure: Use bullet points, paragraphs, or lists where appropriate to make the answer easy to read.
+3. Tone: Maintain a professional, friendly, and conversational tone. Avoid being curt or overly direct.
+4. Accuracy: Use ONLY the provided context. Do not invent information.
+5. Missing Info: If the context is insufficient, politely explain what is missing and ask the user to provide more documents."""
 
     prompt = f"""Context:
 {context[:4000]}
 
 User's Question: {question}
 
-Answer (be direct and only provide what was asked):"""
+Answer (be helpful and conversational):"""
 
     answer = await call_llm(prompt, system_prompt)
     
